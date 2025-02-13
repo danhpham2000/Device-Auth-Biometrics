@@ -17,23 +17,20 @@ export default function App() {
     e.preventDefault();
     let emailRegister = await navigator.credentials.create({
       publicKey: {
-        challenge: new Uint8Array(0),
+        challenge: new Uint8Array([]),
         rp: { id: "localhost", name: "Auth Device" },
         user: {
-          id: new Uint8Array(32),
-          name: email,
-          displayName: email,
+          id: new Uint8Array([]),
+          name: "",
+          displayName: "",
         },
-        attestation: "none",
         authenticatorSelection: {
           authenticatorAttachment: "platform",
           requireResidentKey: false,
           userVerification: "required",
         },
-        pubKeyCredParams: [
-          { type: "public-key", alg: -7 },
-          { type: "public-key", alg: -257 },
-        ],
+        attestation: "none",
+        pubKeyCredParams: [],
         timeout: timeBound,
       },
     });
@@ -66,9 +63,9 @@ export default function App() {
 
     let emailCredential = await navigator.credentials.get({
       publicKey: {
-        challenge: new Uint8Array(0),
+        challenge: new Uint8Array([]),
         rpId: "localhost",
-        userVerification: "required",
+        // userVerification: "required",
         allowCredentials: [],
       },
     });
