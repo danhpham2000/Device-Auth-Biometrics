@@ -51,3 +51,7 @@ button:last-of-type {
 button:last-of-type:hover {
   background-color: #1e7e34;
 }
+
+.message {
+  color: black;
+}
