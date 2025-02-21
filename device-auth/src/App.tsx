@@ -3,26 +3,33 @@ import "./App.css";
 
 export default function App() {
   const [email, setEmail] = useState("");
-  const [userID, setUserID] = useState<ArrayBuffer | null>(null);
+  const [userID, setUserID] = useState<Uint8Array | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+  // Set time expires
   const timeBound = 1 * 60 * 1000;
   const expiresAt = new Date(Date.now() + timeBound).toISOString();
   const deviceBound = navigator.userAgent;
 
+  // Check token logic for trusted device
   useEffect(() => {
     const tokenAvailable = localStorage.getItem("token");
 
-    if (tokenAvailable) {
+    if (!tokenAvailable) {
+      console.log("Token not available, please login ");
+      return;
+    }
+
+    try {
       const parsedToken = JSON.parse(tokenAvailable);
-      console.log(parsedToken.timeBound);
-      console.log(new Date(Date.now()).toISOString());
 
       if (new Date(Date.now()).toISOString() >= parsedToken.timeBound) {
         console.log("Token expired. Removing...");
         localStorage.removeItem("token");
       }
+    } catch (err) {
+      console.log(err);
     }
   }, []);
 
@@ -76,7 +83,20 @@ export default function App() {
 
     const checkToken = localStorage.getItem("token");
     if (checkToken) {
-      await navigator.credentials.get({
+      console.log("Token is avaialbe, no need to check server-side");
+      const parsedToken = JSON.parse(checkToken);
+      const checkCompatible = navigator.userAgent === parsedToken.deviceToken;
+
+      console.log("Check compatible", checkCompatible);
+
+      if (!checkCompatible) {
+        console.log("Token expires or device not correct");
+        setMessage("Error check because device not correct");
+        return;
+      }
+
+      console.log("Begin biometrics");
+      const checkBiometrics = await navigator.credentials.get({
         publicKey: {
           challenge: new Uint8Array(0),
           rpId: "localhost",
@@ -84,38 +104,19 @@ export default function App() {
           allowCredentials: [],
         },
       });
-      console.log("Ending biometrics");
 
-      console.log("Token is avaialbe, no need to check server-side");
-      const parsedToken = JSON.parse(checkToken);
-      const checkCompatible =
-        new Date(Date.now()).toISOString() < parsedToken.timeBound &&
-        navigator.userAgent === parsedToken.deviceID;
+      if (checkBiometrics) {
+        console.log("End biometrics after verification");
 
-      if (!checkCompatible) {
-        return { error: "token expires or device is not ok" };
+        setMessage("Grant access");
+        return;
       }
-
-      console.log("Begin biometrics");
-      if (checkCompatible) {
-        await navigator.credentials.get({
-          publicKey: {
-            challenge: new Uint8Array(0),
-            rpId: "localhost",
-            userVerification: "required",
-            allowCredentials: [],
-          },
-        });
-      }
-
-      console.log("End biometrics after verification");
-
-      setMessage("Grant access");
-      return { message: "Grant access" };
     } else {
+      console.log("There is no token");
+
       let emailCredential = await navigator.credentials.get({
         publicKey: {
-          challenge: new Uint8Array([]),
+          challenge: new Uint8Array(0),
           rpId: "localhost",
           userVerification: "required",
           allowCredentials: [],
@@ -132,6 +133,11 @@ export default function App() {
             "Content-Type": "application/json",
           },
         });
+
+        localStorage.setItem(
+          "token",
+          JSON.stringify({ deviceToken: deviceBound, timeBound: expiresAt })
+        );
 
         if (res.ok) {
           const result = await res.json();

@@ -16,7 +16,7 @@ app = FastAPI()
 models.Base.metadata.create_all(bind=engine)
 
 origins = [
-    "http://localhost:5173"
+    "http://localhost:5173" 
 ]
 
 app.add_middleware(
@@ -39,10 +39,6 @@ def get_db():
     finally:
         db.close()
 
-
-
-
-
 db_dependency = Annotated[Session, Depends(get_db)]
 
 
@@ -61,7 +57,7 @@ async def registerEmail(authUser: AuthUserBase, db: db_dependency):
     newUser = models.AuthUser(
         email=authUser.email, 
         deviceID=authUser.deviceID,
-        tokenExpires=authUser.tokenExpires)
+        tokenExpires=authUser.tokenExpires + timedelta(minutes=3))
     
     db.add(newUser)
     db.commit()
