@@ -1,9 +1,16 @@
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
-URL_DATABASE = "postgresql://danhpham:David2022!pcd@localhost:5432/biometrics-auth"
+DB_USER=os.environ.get("DB_USER")
+DB_PASSWORD=os.environ.get("DB_PASSWORD")
+DB_NAME=os.environ.get("DB_NAME")
+
+URL_DATABASE = f"postgresql://{DB_USER}:{DB_PASSWORD}@localhost:5432/{DB_NAME}"
 
 engine = create_engine(URL_DATABASE)
 
