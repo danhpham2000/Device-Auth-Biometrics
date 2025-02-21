@@ -1,6 +1,6 @@
 # This is a repository for implementing the solution for authenticate email without any passkey technology
 # Description:
-- Tech stack: Simple with React, WebAuthn APIs, Python, FastAPI, and PostgreSQL
+- Tech stack: Simple with React, WebAuthn APIs, Python, FastAPI, and PostgreSQL, and TypeORM
 - Checklist:
   
       - Backend (OK)
